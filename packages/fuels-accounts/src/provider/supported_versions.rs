@@ -1,9 +1,13 @@
+use std::env;
+
 use semver::Version;
 
 fn get_supported_fuel_core_version() -> Version {
-    fuel_core::VERSION
-        .parse()
-        .expect("failed to parse fuel-core version")
+    let manifest_dir = env::var("CARGO_MANIFEST_DIR").expect("failed to get CARGO_MANIFEST_DIR");
+    let version_file_path = std::path::PathBuf::from(manifest_dir).join("fuel-core-version");
+    let version =
+        std::fs::read_to_string(version_file_path).expect("failed to read fuel-core-version file");
+    version.parse().expect("failed to parse fuel-core version")
 }
 
 #[derive(Debug, PartialEq, Eq)]
