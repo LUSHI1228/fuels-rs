@@ -1,4 +1,4 @@
-use std::{env, fs, io::Write, path};
+use std::{env, fs, path};
 
 fn main() {
     let fuels_accounts_dir = path::PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
@@ -17,6 +17,5 @@ fn main() {
     println!("cargo:rerun-if-changed=build.rs");
 
     let out_path = fuels_accounts_dir.join("fuel-core-version");
-    let out_file = fs::File::create(out_path).expect("failed to create fuel-core-version file");
-    write!(&out_file, "{}", fuel_core::VERSION).expect("failed to write fuel-core-version file");
+    fs::write(out_path, fuel_core::VERSION).expect("failed to write fuel-core-version file");
 }
