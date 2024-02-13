@@ -160,24 +160,25 @@ pub(crate) fn expand_fn(abi_fun: &FullABIFunction) -> Result<TokenStream> {
     ));
 
     let original_output = generator.output_type();
-    generator.set_output_type(
-        quote! {::fuels::programs::contract::ContractCallHandler<T, #original_output> },
-    );
-
     let fn_selector = generator.fn_selector();
     let arg_tokens = generator.tokenized_args();
     let is_payable = abi_fun.is_payable();
     let body = quote! {
-            ::fuels::programs::contract::method_hash(
+        ::fuels::programs::contract::ContractCallHandler::new(
+            ::fuels::programs::contract::ContractCall::new::<#original_output>(
                 self.contract_id.clone(),
-                self.account.clone(),
                 #fn_selector,
                 &#arg_tokens,
-                self.log_decoder.clone(),
-                #is_payable,
                 self.encoder_config.clone(),
-            )
+                #is_payable
+            ),
+            self.account.clone(),
+            self.log_decoder.clone(),
+        )
     };
+    generator.set_output_type(
+        quote! {::fuels::programs::contract::ContractCallHandler<T, #original_output> },
+    );
     generator.set_body(body);
 
     Ok(generator.generate())

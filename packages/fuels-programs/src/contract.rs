@@ -414,6 +414,26 @@ pub struct ContractCall {
 }
 
 impl ContractCall {
+    pub fn new<D: Tokenizable + Parameterize>(
+        contract_id: Bech32ContractId,
+        encoded_selector: Selector,
+        args: &[Token],
+        encoder_config: EncoderConfig,
+        is_payable: bool,
+    ) -> Self {
+        Self {
+            contract_id,
+            encoded_selector,
+            encoded_args: ABIEncoder::new(encoder_config).encode(args),
+            call_parameters: Default::default(),
+            compute_custom_input_offset: should_compute_custom_input_offset(args),
+            output_param: D::param_type(),
+            is_payable,
+            variable_outputs: vec![],
+            external_contracts: vec![],
+            custom_assets: Default::default(),
+        }
+    }
     pub fn with_contract_id(self, contract_id: Bech32ContractId) -> Self {
         ContractCall {
             contract_id,
@@ -478,6 +498,18 @@ where
     T: Account,
     D: Tokenizable + Parameterize + Debug,
 {
+    pub fn new(contract_call: ContractCall, account: T, log_decoder: LogDecoder) -> Self {
+        Self {
+            contract_call,
+            tx_policies: Default::default(),
+            cached_tx_id: None,
+            account,
+            datatype: PhantomData,
+            log_decoder,
+            decoder_config: Default::default(),
+        }
+    }
+
     /// Sets external contracts as dependencies to this contract's call.
     /// Effectively, this will be used to create [`fuel_tx::Input::Contract`]/[`fuel_tx::Output::Contract`]
     /// pairs and set them into the transaction. Note that this is a builder
@@ -714,30 +746,20 @@ pub fn method_hash<D: Tokenizable + Parameterize + Debug, T: Account>(
     is_payable: bool,
     encoder_config: EncoderConfig,
 ) -> ContractCallHandler<T, D> {
-    let encoded_selector = signature;
-
-    let tx_policies = TxPolicies::default();
-    let call_parameters = CallParameters::default();
-
-    let compute_custom_input_offset = should_compute_custom_input_offset(args);
-
-    let unresolved_bytes = ABIEncoder::new(encoder_config).encode(args);
-    let contract_call = ContractCall {
-        contract_id,
-        encoded_selector,
-        encoded_args: unresolved_bytes,
-        call_parameters,
-        compute_custom_input_offset,
-        variable_outputs: vec![],
-        external_contracts: vec![],
-        output_param: D::param_type(),
-        is_payable,
-        custom_assets: Default::default(),
-    };
-
     ContractCallHandler {
-        contract_call,
-        tx_policies,
+        contract_call: ContractCall {
+            contract_id,
+            encoded_selector: signature,
+            encoded_args: ABIEncoder::new(encoder_config).encode(args),
+            call_parameters: CallParameters::default(),
+            compute_custom_input_offset: should_compute_custom_input_offset(args),
+            variable_outputs: vec![],
+            external_contracts: vec![],
+            output_param: D::param_type(),
+            is_payable,
+            custom_assets: Default::default(),
+        },
+        tx_policies: TxPolicies::default(),
         cached_tx_id: None,
         account,
         datatype: PhantomData,
