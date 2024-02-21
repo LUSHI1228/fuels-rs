@@ -7,7 +7,7 @@ use color_eyre::{
 };
 use regex::Regex;
 use versions_manager::{
-    metadata::collect_versions_from_cargo_toml, replace::replace_versions_in_file,
+    metadata::collect_versions_from_cargo_toml, write::replace_versions_in_file,
 };
 use walkdir::WalkDir;
 
