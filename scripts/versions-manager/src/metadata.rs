@@ -1,6 +1,6 @@
 use std::{collections::HashMap, path::Path};
 
-use cargo_metadata::MetadataCommand;
+use cargo_metadata::{semver::Version, MetadataCommand};
 use color_eyre::{eyre::Context, Result};
 use serde::Deserialize;
 
@@ -16,9 +16,9 @@ pub struct VersionsReplacerMetadata {
     pub external_versions: HashMap<String, String>,
 }
 
-pub fn collect_versions_from_cargo_toml(
-    manifest_path: impl AsRef<Path>,
-) -> Result<HashMap<String, String>> {
+pub type VersionMap = HashMap<String, Version>;
+
+pub fn collect_versions_from_cargo_toml(manifest_path: impl AsRef<Path>) -> Result<VersionMap> {
     let metadata = MetadataCommand::new()
         .manifest_path(manifest_path.as_ref())
         .exec()
@@ -26,7 +26,7 @@ pub fn collect_versions_from_cargo_toml(
     let version_map = metadata
         .packages
         .iter()
-        .map(|package| (package.name.clone(), package.version.to_string()))
+        .map(|package| (package.name.clone(), package.version.clone()))
         .collect::<HashMap<_, _>>();
     Ok(version_map)
 }

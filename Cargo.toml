@@ -25,7 +25,7 @@ members = [
   "packages/fuels-test-helpers",
   "packages/wasm-tests",
   "scripts/check-docs",
-  "scripts/versions-replacer",
+  "scripts/versions-manager",
 ]
 
 [workspace.package]

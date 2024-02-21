@@ -6,7 +6,7 @@ use color_eyre::{
     Result,
 };
 use regex::Regex;
-use versions_replacer::{
+use versions_manager::{
     metadata::collect_versions_from_cargo_toml, replace::replace_versions_in_file,
 };
 use walkdir::WalkDir;
@@ -14,7 +14,7 @@ use walkdir::WalkDir;
 #[derive(FromArgs)]
 /// Replace variables like '{{{{versions.fuels}}}}' with correct versions from Cargo.toml.
 /// Uses versions from '[workspace.members]' and '[workspace.metadata.versions-replacer.external-versions]'.
-struct VersionsReplacer {
+struct VersionsManager {
     /// path to directory with files containing variables
     #[argh(positional)]
     path: PathBuf,
@@ -27,7 +27,7 @@ struct VersionsReplacer {
 }
 
 fn main() -> Result<()> {
-    let args: VersionsReplacer = argh::from_env();
+    let args: VersionsManager = argh::from_env();
     let versions = collect_versions_from_cargo_toml(&args.manifest_path)?;
 
     let mut total_replacements: Vec<usize> = Vec::new();

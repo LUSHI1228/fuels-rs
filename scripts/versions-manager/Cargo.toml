@@ -1,5 +1,5 @@
 [package]
-name = "versions-replacer"
+name = "versions-manager"
 version = { workspace = true }
 authors = { workspace = true }
 edition = { workspace = true }

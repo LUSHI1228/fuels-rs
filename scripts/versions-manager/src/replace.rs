@@ -1,16 +1,15 @@
-use std::{borrow::Cow, collections::HashMap, fs, path::Path};
+use std::{borrow::Cow, fs, path::Path};
 
 use color_eyre::{eyre::Context, Result};
 use once_cell::sync::Lazy;
 use regex::{Captures, Regex};
 
+use crate::metadata::VersionMap;
+
 pub static VERSIONS_REGEX: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"\{\{versions\.([\w_-]+)\}\}").unwrap());
 
-pub fn replace_versions_in_file(
-    path: impl AsRef<Path>,
-    versions: &HashMap<String, String>,
-) -> Result<usize> {
+pub fn replace_versions_in_file(path: impl AsRef<Path>, versions: &VersionMap) -> Result<usize> {
     let path = path.as_ref();
     let contents =
         fs::read_to_string(path).wrap_err_with(|| format!("failed to read {:?}", path))?;
@@ -22,15 +21,12 @@ pub fn replace_versions_in_file(
     Ok(replacement_count)
 }
 
-pub fn replace_versions_in_string<'a>(
-    s: &'a str,
-    versions: &HashMap<String, String>,
-) -> (Cow<'a, str>, usize) {
+pub fn replace_versions_in_string<'a>(s: &'a str, versions: &VersionMap) -> (Cow<'a, str>, usize) {
     let mut replacement_count = 0;
     let replaced_s = VERSIONS_REGEX.replace_all(s, |caps: &Captures| {
         if let Some(version) = versions.get(&caps[1]) {
             replacement_count += 1;
-            version.clone()
+            version.to_string()
         } else {
             // leave unchanged
             caps[0].to_string()
@@ -43,9 +39,9 @@ pub fn replace_versions_in_string<'a>(
 mod tests {
     use super::*;
 
-    fn test_versions() -> HashMap<String, String> {
+    fn test_versions() -> VersionMap {
         [("fuels", "0.47.0"), ("fuel-types", "0.35.3")]
-            .map(|(name, version)| (name.to_string(), version.to_string()))
+            .map(|(name, version)| (name.to_string(), version.parse().unwrap()))
             .into()
     }
 
