@@ -13,5 +13,5 @@ jobs:
     uses: FuelLabs/github-actions/.github/workflows/mdbook-docs.yml@master
     with:
       docs-src-path: "docs/src"
-      pre-command: 'cargo run --package versions-replacer -- ./docs --manifest-path ./Cargo.toml --filename-regex "\.md$"'
+      pre-command: 'cargo run --package versions-replacer -- --manifest-path ./Cargo.toml replace ./docs --filename-regex "\.md$"'
       spellcheck-config-path: 'docs/.spellcheck.yml'
