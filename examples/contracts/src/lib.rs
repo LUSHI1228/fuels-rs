@@ -144,7 +144,6 @@ mod tests {
 
         // Optional: Configure deployment parameters
         let tx_policies = TxPolicies::default()
-            .with_gas_price(0)
             .with_script_gas_limit(1_000_000)
             .with_maturity(0);
 
@@ -281,7 +280,6 @@ mod tests {
         let contract_methods = MyContract::new(contract_id.clone(), wallet.clone()).methods();
 
         let tx_policies = TxPolicies::default()
-            .with_gas_price(1)
             .with_script_gas_limit(1_000_000)
             .with_maturity(0);
 
